@@ -1,0 +1,23 @@
+{
+  "development": {
+    "username": "kennedy",
+    "password": "my_secure_password",
+    "database": "db_journal",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "test": {
+    "username": "kennedy",
+    "password": "my_secure_password",
+    "database": "db_journal",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  },
+  "production": {
+    "username": "kennedy",
+    "password": "my_secure_password",
+    "database": "db_journal",
+    "host": "127.0.0.1",
+    "dialect": "postgres"
+  }
+}
