@@ -12,9 +12,7 @@ Method 1: From github
 git clone https://github.com/kennedymakokha/personal_journal_api.git
 cd personal_journal_api
 npm install
-npm start
-Open your local browser and verify the personal_journal_api is working by accessing:
-http://localhost:5000/journals/
-http://localhost:5000/journals/1
+npm run dev 
+
 
 
