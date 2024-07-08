@@ -19,6 +19,46 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware_1 = require("../middlewares/authMiddleware");
 const router = (0, express_1.Router)();
 const { sign, decode, verify } = jsonwebtoken_1.default;
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: sign Up User
+ *     tags: [User]
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *               confirm_password:
+ *                 type: password
+ *
+ *             example:
+ *                name: "nebukadinezza"
+ *                email: "nebukadinezza@example.com"
+ *                password: "nebukadinezza"
+ *                confirm_password: "nebukadinezza"
+ *
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Register User 
 router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         console.log(req.body);
@@ -27,7 +67,7 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
             where: { name }
         });
         if (userExists) {
-            return res.status(400).send('Email is already associated with an account');
+            return res.status(400).send('Username is already associated with an account');
         }
         const users = yield user_1.default.create({
             name,
@@ -41,6 +81,41 @@ router.post('/register', (req, res) => __awaiter(void 0, void 0, void 0, functio
         res.status(500).json({ message: 'Something went wrong', error });
     }
 }));
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login User
+ *     tags: [User]
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *
+ *
+ *             example:
+ *                name: "nebukadinezza"
+ *                password: "nebukadinezza"
+ *
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Login User 
 router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, password } = req.body;
@@ -69,10 +144,65 @@ router.post('/login', (req, res) => __awaiter(void 0, void 0, void 0, function* 
         res.status(500).json({ message: 'Something went wrong', error });
     }
 }));
+/**
+ * @swagger
+ * /user:
+ *   put:
+ *     summary: Edit  User
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *               confirm_password:
+ *                 type: password
+ *
+ *             example:
+ *                name: "nebukadinezza"
+ *                email: "nebukadinezza@example.com"
+ *                password: "nebukadinezza"
+ *                confirm_password: "nebukadinezza"
+ *
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Edit User 
 router.put('/user', [authMiddleware_1.authMiddleware, authMiddleware_1.authorized], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        if (req.body.password) {
+        const userObj = yield user_1.default.findOne({
+            where: { id: req.user.id },
+        });
+        res.st;
+        if (req.body.password !== "") {
             req.body.password = yield bcryptjs_1.default.hash(req.body.password, 15);
+        }
+        else {
+            req.body.password = userObj === null || userObj === void 0 ? void 0 : userObj.password;
         }
         const users = yield user_1.default.update(req.body, {
             where: { id: req.user.id },
@@ -83,6 +213,31 @@ router.put('/user', [authMiddleware_1.authMiddleware, authMiddleware_1.authorize
         res.status(500).json({ message: 'Something went wrong', error });
     }
 }));
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Get Authenticated User
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       404:
+ *         description: User not found
+ */
+//Get Authenticated User
 router.get('/user', [authMiddleware_1.authMiddleware, authMiddleware_1.authorized], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userObj = yield user_1.default.findOne({
@@ -94,6 +249,31 @@ router.get('/user', [authMiddleware_1.authMiddleware, authMiddleware_1.authorize
         res.status(500).json({ message: 'Something went wrong', error });
     }
 }));
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Fetch Users
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: [{}]
+ *       404:
+ *         description: User not found
+ */
+//Get Fetch Users 
 router.get('/users', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield user_1.default.findAll({});

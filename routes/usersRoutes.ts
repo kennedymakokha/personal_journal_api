@@ -7,6 +7,46 @@ const router = Router();
 
 
 const { sign, decode, verify } = jsonwebtoken;
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: sign Up User
+ *     tags: [User]
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *               confirm_password:
+ *                 type: password
+ *              
+ *             example:
+ *                name: "nebukadinezza"
+ *                email: "nebukadinezza@example.com"
+ *                password: "nebukadinezza"
+ *                confirm_password: "nebukadinezza"
+ *               
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Register User 
 
 router.post('/register', async (req: any, res: any) => {
     try {
@@ -16,7 +56,7 @@ router.post('/register', async (req: any, res: any) => {
             where: { name }
         });
         if (userExists) {
-            return res.status(400).send('Email is already associated with an account');
+            return res.status(400).send('Username is already associated with an account');
         }
         const users = await User.create({
             name,
@@ -30,6 +70,42 @@ router.post('/register', async (req: any, res: any) => {
         res.status(500).json({ message: 'Something went wrong', error });
     }
 });
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Login User
+ *     tags: [User]
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *            
+ *              
+ *             example:
+ *                name: "nebukadinezza"
+ *                password: "nebukadinezza"
+ *               
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Login User 
+
 router.post('/login', async (req: any, res: any) => {
     try {
         const { name, password } = req.body;
@@ -59,11 +135,65 @@ router.post('/login', async (req: any, res: any) => {
         res.status(500).json({ message: 'Something went wrong', error });
     }
 });
+/**
+ * @swagger
+ * /user:
+ *   put:
+ *     summary: Edit  User
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     requestBody:
+ *       description: User object to be added
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: password
+ *               confirm_password:
+ *                 type: password
+ *              
+ *             example:
+ *                name: "nebukadinezza"
+ *                email: "nebukadinezza@example.com"
+ *                password: "nebukadinezza"
+ *                confirm_password: "nebukadinezza"
+ *               
+ *     responses:
+ *       201:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       400:
+ *         description: Invalid request
+ */
+//Edit User 
 
 router.put('/user', [authMiddleware, authorized], async (req: any, res: any) => {
     try {
-        if (req.body.password) {
+        const userObj = await User.findOne({
+            where: { id: req.user.id },
+        });
+        res.st
+        if (req.body.password !== "") {
             req.body.password = await bcrypt.hash(req.body.password, 15)
+        } else {
+            req.body.password = userObj?.password
         }
         const users = await User.update(req.body, {
             where: { id: req.user.id },
@@ -75,6 +205,33 @@ router.put('/user', [authMiddleware, authorized], async (req: any, res: any) => 
         res.status(500).json({ message: 'Something went wrong', error });
     }
 });
+/**
+ * @swagger
+ * /user:
+ *   get:
+ *     summary: Get Authenticated User
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: {}
+ *       404:
+ *         description: User not found
+ */
+
+
+//Get Authenticated User
 
 router.get('/user', [authMiddleware, authorized], async (req: any, res: any) => {
     try {
@@ -86,6 +243,31 @@ router.get('/user', [authMiddleware, authorized], async (req: any, res: any) => 
         res.status(500).json({ message: 'Something went wrong', error });
     }
 });
+/**
+ * @swagger
+ * /users:
+ *   get:
+ *     summary: Fetch Users
+ *     tags: [User]
+ *     parameters:
+ *       - in: header
+ *         name: Authorization
+ *         schema:
+ *          type: string
+ *          example: 'Bearer XXX'
+ *         required: true
+
+ *     responses:
+ *       200:
+ *         description: Successful response
+ *         content:
+ *           application/json:
+ *             example:
+ *               data: [{}]
+ *       404:
+ *         description: User not found
+ */
+//Get Fetch Users 
 router.get('/users', async (req: any, res: any) => {
     try {
         const users = await User.findAll({
